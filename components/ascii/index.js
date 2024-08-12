@@ -4,10 +4,6 @@ import { EffectComposer } from '@react-three/postprocessing'
 import cn from 'clsx'
 import { ASCIIEffect } from 'components/ascii-effect/index'
 import { FontEditor } from 'components/font-editor'
-import { GUI } from 'components/gui'
-import { button, useControls } from 'leva'
-import { text } from 'lib/leva/text'
-import { useStore } from 'lib/store'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AnimationMixer,
@@ -224,13 +220,10 @@ function Postprocessing() {
 function Inner() {
   const ContextBridge = useContextBridge(AsciiContext)
 
-  const gui = useStore(({ gui }) => gui)
-
   return (
     <>
       <div className={s.ascii}>
-        <GUI />
-        <div className={cn(s.canvas, gui && s.open)}>
+        <div className={cn(s.canvas)}>
           <Canvas
             flat
             linear
@@ -276,176 +269,29 @@ const DEFAULT = {
 }
 
 export function ASCII({ children }) {
-  const initialUrlParams = useMemo(
-    () => new URLSearchParams(window.location.search),
-    []
-  )
-
   const [charactersTexture, setCharactersTexture] = useState(null)
   const [canvas, setCanvas] = useState()
 
-  const [
-    {
-      characters,
-      granularity,
-      charactersLimit,
-      fontSize,
-      fillPixels,
-      setColor,
-      color,
-      fit,
-      greyscale,
-      invert,
-      matrix,
-      setTime,
-      time,
-      background,
-    },
-    _set,
-  ] = useControls(
-    () => ({
-      characters: text(
-        initialUrlParams.get('characters') || DEFAULT.characters
-      ),
-      granularity: {
-        min: 4,
-        max: 32,
-        value: initialUrlParams.get('granularity') || DEFAULT.granularity,
-        step: 1,
-        label: 'granularity',
-      },
-      charactersLimit: {
-        min: 1,
-        max: 48,
-        value:
-          initialUrlParams.get('charactersLimit') || DEFAULT.charactersLimit,
-        step: 1,
-        label: 'charLimit',
-      },
-      fontSize: {
-        min: 1,
-        max: 128,
-        value: initialUrlParams.get('fontSize') || DEFAULT.fontSize,
-        step: 1,
-        label: 'font size',
-      },
-      greyscale: {
-        value:
-          initialUrlParams.get('greyscale') === 'true' || DEFAULT.greyscale,
-      },
-      invert: {
-        value: initialUrlParams.get('invert') === 'true' || DEFAULT.invert,
-      },
-      fillPixels: {
-        value:
-          initialUrlParams.get('fillPixels') === 'true' || DEFAULT.fillPixels,
-        label: 'fill pixels',
-      },
-      fit: {
-        value: initialUrlParams.get('fit') || DEFAULT.fit,
-      },
-      matrix: {
-        value: initialUrlParams.get('matrix') === 'true' || DEFAULT.matrix,
-      },
-      setTime: {
-        value: !!initialUrlParams.get('time') || DEFAULT.setTime,
-        label: 'set time',
-        render: (get) => get('matrix') === true,
-      },
-      time: {
-        min: 0,
-        value: parseFloat(initialUrlParams.get('time')) || DEFAULT.time,
-        max: 1,
-        step: 0.01,
-        render: (get) => get('setTime') === true,
-      },
-      setColor: {
-        value: !!initialUrlParams.get('color') || DEFAULT.setColor,
-        label: 'set color',
-      },
-      color: {
-        value: initialUrlParams.get('color')
-          ? '#' + initialUrlParams.get('color')
-          : DEFAULT.color,
-        label: 'color',
-        render: (get) => get('setColor') === true,
-      },
-      background: {
-        value: initialUrlParams.get('background')
-          ? '#' + initialUrlParams.get('background')
-          : DEFAULT.background,
-        label: 'background',
-      },
-    }),
-    []
-  )
-
-  useControls(
-    () => ({
-      export: button(() => {
-        let a = document.createElement('a')
-        a.download = 'ASCII'
-
-        requestAnimationFrame(() => {
-          a.href = canvas.toDataURL('image/png;base64')
-          a.click()
-        })
-      }),
-      reset: button(() => {
-        _set(DEFAULT)
-      }),
-    }),
-    [canvas]
-  )
-
-  const UrlParams = useMemo(() => {
-    const params = new URLSearchParams()
-    params.set('characters', characters)
-    params.set('granularity', granularity)
-    params.set('charactersLimit', charactersLimit)
-    params.set('fontSize', fontSize)
-    params.set('matrix', matrix === true)
-    params.set('invert', invert === true)
-    params.set('greyscale', greyscale === true)
-    params.set('fillPixels', fillPixels === true)
-    if (setTime) {
-      params.set('time', time)
-    } else {
-      params.delete('time')
-    }
-
-    if (setColor) {
-      params.set('color', color.replace('#', ''))
-    } else {
-      params.delete('color')
-    }
-
-    params.set('background', background.replace('#', ''))
-    return params
-  }, [
+  const {
     characters,
     granularity,
+    charactersLimit,
     fontSize,
     fillPixels,
     setColor,
     color,
-    invert,
+    fit,
     greyscale,
+    invert,
     matrix,
     setTime,
     time,
     background,
-  ])
-
-  useEffect(() => {
-    const url = window.origin + '?' + UrlParams.toString()
-    window.history.replaceState({}, null, url)
-  }, [UrlParams])
+  } = DEFAULT
 
   function set({ charactersTexture, canvas, ...props }) {
     if (charactersTexture) setCharactersTexture(charactersTexture)
     if (canvas) setCanvas(canvas)
-    _set(props)
   }
 
   return (
