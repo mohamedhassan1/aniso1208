@@ -129,19 +129,6 @@ function Scene() {
 
   const { viewport, camera } = useThree()
 
-  // const initialCamera = useRef()
-
-  // useEffect(() => {
-  //   initialCamera.current = camera.clone()
-  // }, [])
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     camera.position.copy(initialCamera.current.position)
-  //     camera.rotation.copy(initialCamera.current.rotation)
-  //   }, 0)
-  // }, [texture, gltf, camera])
-
   const dimensions = useMemo(() => {
     if (!texture) return
     if (texture.isVideoTexture) {
@@ -159,28 +146,6 @@ function Scene() {
 
   const { fit } = useContext(AsciiContext)
 
-  const [drag, setDrag] = useState(false)
-  const dropzone = useRef()
-
-  useEffect(() => {
-    function onDragEnter(e) {
-      setDrag(true)
-    }
-
-    function onDragLeave(e) {
-      if (e.srcElement !== dropzone.current) return
-      setDrag(false)
-    }
-
-    window.addEventListener('dragenter', onDragEnter)
-    window.addEventListener('dragleave', onDragLeave)
-
-    return () => {
-      window.removeEventListener('dragenter', onDragEnter)
-      window.removeEventListener('dragleave', onDragLeave)
-    }
-  }, [])
-
   useEffect(() => {
     if (texture) {
       camera.position.set(0, 0, 5)
@@ -195,73 +160,13 @@ function Scene() {
 
   return (
     <>
-      <ui.In>
-        {drag && (
-          <div
-            ref={dropzone}
-            className={s.dropzone}
-            onDrop={(e) => {
-              e.preventDefault()
-
-              setDrag(false)
-
-              const filename = e.dataTransfer.files[0].name
-              const isFont =
-                filename.endsWith('.ttf') ||
-                filename.endsWith('.otf') ||
-                filename.endsWith('.woff') ||
-                filename.endsWith('.woff2')
-
-              const reader = new FileReader()
-              reader.addEventListener(
-                'load',
-                async function (event) {
-                  if (isFont) {
-                    const fontData = event.target.result
-                    const fontName = 'CustomFont' // Choose a name for your custom font
-
-                    const fontFace = `
-                    @font-face {
-                      font-family: '${fontName}';
-                      src: url(${fontData});
-                    }
-                  `
-
-                    const styleElement = document.createElement('style')
-                    styleElement.innerHTML = fontFace
-
-                    document.head.appendChild(styleElement)
-                  } else {
-                    setAsset(reader.result)
-                  }
-                },
-                false
-              )
-
-              if (e.dataTransfer.files[0]) {
-                reader.readAsDataURL(e.dataTransfer.files[0])
-              }
-            }}
-            onDragOver={(e) => {
-              e.preventDefault()
-            }}
-          />
-        )}
-      </ui.In>
-
       <group ref={ref}>
-        {/* <mesh geometry={gltf.nodes.Cube.geometry}>
-          <meshBasicMaterial color="#ff0000" />
-        </mesh> */}
-
         {gltf && (
           <>
             <OrbitControls makeDefault />
-            {/* <Bounds fit observe margin={1.2}> */}
             <group scale={200}>
               <primitive object={gltf} />
             </group>
-            {/* </Bounds> */}
           </>
         )}
 
@@ -271,11 +176,6 @@ function Scene() {
             <meshBasicMaterial map={texture} />
           </mesh>
         )}
-
-        {/* <mesh scale={2}>
-          <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
-          <meshNormalMaterial attach="material" />
-        </mesh> */}
       </group>
     </>
   )
@@ -284,23 +184,10 @@ function Scene() {
 function Postprocessing() {
   const { gl, viewport } = useThree()
   const { set } = useContext(AsciiContext)
-  // const effectComposer = useRef()
 
   useEffect(() => {
     set({ canvas: gl.domElement })
   }, [gl])
-
-  // useControls(() => ({
-  //   export: button(() => {
-  //     let a = document.createElement('a')
-  //     a.download = 'ASCII'
-  //     // effectComposer.current.render(scene, camera)
-  //     requestAnimationFrame(() => {
-  //       a.href = gl.domElement.toDataURL('image/png;base64')
-  //       a.click()
-  //     })
-  //   }),
-  // }))
 
   const {
     charactersTexture,
@@ -314,7 +201,6 @@ function Postprocessing() {
     time,
     background,
   } = useContext(AsciiContext)
-  console.log('background', background)
 
   return (
     <EffectComposer>
@@ -396,9 +282,6 @@ export function ASCII({ children }) {
   )
 
   const [charactersTexture, setCharactersTexture] = useState(null)
-  // const [characters, setCharacters] = useState(
-  //   initialUrlParams.get('characters') || DEFAULT.characters
-  // )
   const [canvas, setCanvas] = useState()
 
   const [
@@ -424,9 +307,6 @@ export function ASCII({ children }) {
       characters: text(
         initialUrlParams.get('characters') || DEFAULT.characters
       ),
-      // characters: {
-      //   value: initialUrlParams.get('characters') || DEFAULT.characters,
-      // },
       granularity: {
         min: 4,
         max: 32,
@@ -478,13 +358,7 @@ export function ASCII({ children }) {
         max: 1,
         step: 0.01,
         render: (get) => get('setTime') === true,
-        // optional: true,
-        // disabled: !initialUrlParams.get('time'),
       },
-      // overwriteColor: {
-      //   value: !!initialUrlParams.get('color') || DEFAULT.overwriteColor,
-      //   label: 'overwrite color',
-      // },
       setColor: {
         value: !!initialUrlParams.get('color') || DEFAULT.setColor,
         label: 'set color',
@@ -493,16 +367,13 @@ export function ASCII({ children }) {
         value: initialUrlParams.get('color')
           ? '#' + initialUrlParams.get('color')
           : DEFAULT.color,
-        // optional: true,
         label: 'color',
         render: (get) => get('setColor') === true,
-        // disabled: !initialUrlParams.get('color'),
       },
       background: {
         value: initialUrlParams.get('background')
           ? '#' + initialUrlParams.get('background')
           : DEFAULT.background,
-        // optional: true,
         label: 'background',
       },
     }),
@@ -528,7 +399,6 @@ export function ASCII({ children }) {
   )
 
   const UrlParams = useMemo(() => {
-    // apply new url params
     const params = new URLSearchParams()
     params.set('characters', characters)
     params.set('granularity', granularity)
@@ -538,7 +408,6 @@ export function ASCII({ children }) {
     params.set('invert', invert === true)
     params.set('greyscale', greyscale === true)
     params.set('fillPixels', fillPixels === true)
-    // params.set('overwriteColor', overwriteColor === true)
     if (setTime) {
       params.set('time', time)
     } else {
@@ -569,24 +438,18 @@ export function ASCII({ children }) {
   ])
 
   useEffect(() => {
-    // change history
     const url = window.origin + '?' + UrlParams.toString()
     window.history.replaceState({}, null, url)
   }, [UrlParams])
 
   function set({ charactersTexture, canvas, ...props }) {
     if (charactersTexture) setCharactersTexture(charactersTexture)
-    // if (characters) setCharacters(characters)
     if (canvas) setCanvas(canvas)
     _set(props)
   }
 
   return (
     <>
-      {/* <p className={s.instruction}>
-        Drag and drop any file (.glb, .mp4, .mov, .webm, .png, .jpg, .webp,
-        .avif)
-      </p> */}
       <AsciiContext.Provider
         value={{
           characters: characters.toUpperCase(),
