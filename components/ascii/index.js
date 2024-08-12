@@ -169,29 +169,43 @@ function Scene() {
 
 function Postprocessing() {
   const { gl, viewport } = useThree()
-  const { set, matrix } = useContext(AsciiContext)
+  const { set } = useContext(AsciiContext)
 
   useEffect(() => {
     set({ canvas: gl.domElement })
-  }, [gl, set])
+  }, [gl])
 
-  console.log('Postprocessing: fit value is', viewport.fit)
+  const {
+    charactersTexture,
+    granularity,
+    charactersLimit,
+    fillPixels,
+    color,
+    greyscale,
+    invert,
+    matrix,
+    time,
+    background,
+    fit,
+  } = useContext(AsciiContext)
+
+  console.log('Postprocessing: fit value is', fit)
   console.log('Postprocessing: matrix effect is', matrix ? 'ON' : 'OFF')
 
   return (
     <EffectComposer>
       <ASCIIEffect
-        charactersTexture={viewport.charactersTexture}
-        granularity={viewport.granularity * viewport.dpr}
-        charactersLimit={viewport.charactersLimit}
-        fillPixels={viewport.fillPixels}
-        color={viewport.color}
-        fit={viewport.fit}
-        greyscale={viewport.greyscale}
-        invert={viewport.invert}
+        charactersTexture={charactersTexture}
+        granularity={granularity * viewport.dpr}
+        charactersLimit={charactersLimit}
+        fillPixels={fillPixels}
+        color={color}
+        fit={fit}
+        greyscale={greyscale}
+        invert={invert}
         matrix={matrix}
-        time={viewport.time}
-        background={viewport.background}
+        time={time}
+        background={background}
       />
     </EffectComposer>
   )
@@ -199,19 +213,18 @@ function Postprocessing() {
 
 function Inner() {
   const ContextBridge = useContextBridge(AsciiContext)
-  const { set, matrix } = useContext(AsciiContext)
-
-  // Local state for matrix effect in Inner component
-  const [localMatrix, setLocalMatrix] = useState(matrix)
+  const { set } = useContext(AsciiContext)
 
   // Toggle matrix effect on Shift+R
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.shiftKey && event.key === 'R') {
-        const newMatrixState = !localMatrix
-        console.log('Shift+R pressed, toggling matrix effect...', newMatrixState)
-        setLocalMatrix(newMatrixState)
-        set({ matrix: newMatrixState })
+        console.log('Shift+R pressed, toggling matrix effect...')
+        set((prevState) => {
+          const newMatrixState = !prevState.matrix
+          console.log('Matrix effect is now', newMatrixState ? 'ON' : 'OFF')
+          return { ...prevState, matrix: newMatrixState }
+        })
       }
     }
 
@@ -219,7 +232,7 @@ function Inner() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [localMatrix, set])
+  }, [set])
 
   return (
     <>
