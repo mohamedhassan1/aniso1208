@@ -219,9 +219,11 @@ function Inner() {
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.shiftKey && event.key === 'R') {
+        console.log('Shift+R pressed, toggling matrix effect...')
         set((prevState) => {
-          console.log('Toggling matrix effect:', !prevState.matrix)
-          return { ...prevState, matrix: !prevState.matrix }
+          const newMatrixState = !prevState.matrix
+          console.log('Matrix effect is now', newMatrixState ? 'ON' : 'OFF')
+          return { ...prevState, matrix: newMatrixState }
         })
       }
     }
@@ -291,6 +293,8 @@ export function ASCII({ children }) {
     if (newSettings.canvas) setCanvas(newSettings.canvas)
     console.log('Settings updated:', newSettings)
   }
+
+  console.log('Current matrix state in ASCII:', state.matrix)
 
   return (
     <AsciiContext.Provider
