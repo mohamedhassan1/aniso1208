@@ -259,14 +259,14 @@ function Inner() {
 }
 
 const DEFAULT = {
-  characters: ' *,    ./O#SF',
+  characters: ' *,    ./O#RL',
   granularity: 8,
   charactersLimit: 16,
   fontSize: 72,
   fillPixels: false,
   setColor: true,
   color: '#ffffff',
-  background: '#000000',
+  background: '#cd9bff',
   greyscale: false,
   invert: false,
   matrix: false,
