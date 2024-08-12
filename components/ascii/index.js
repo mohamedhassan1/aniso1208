@@ -190,7 +190,6 @@ function Postprocessing() {
   } = useContext(AsciiContext)
 
   console.log('Postprocessing: fit value is', fit)
-  console.log('Postprocessing: matrix effect is', matrix ? 'ON' : 'OFF')
 
   return (
     <EffectComposer>
@@ -213,26 +212,6 @@ function Postprocessing() {
 
 function Inner() {
   const ContextBridge = useContextBridge(AsciiContext)
-  const { set } = useContext(AsciiContext)
-
-  // Toggle matrix effect on Shift+R
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.shiftKey && event.key === 'R') {
-        console.log('Shift+R pressed, toggling matrix effect...')
-        set((prevState) => {
-          const newMatrixState = !prevState.matrix
-          console.log('Matrix effect is now', newMatrixState ? 'ON' : 'OFF')
-          return { ...prevState, matrix: newMatrixState }
-        })
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [set])
 
   return (
     <>
@@ -276,7 +255,7 @@ const DEFAULT = {
   background: '#cd9bff',
   greyscale: false,
   invert: false,
-  matrix: false, // Initially off
+  matrix: false,
   setTime: false,
   time: 0,
   fit: true,  // Ensure fit is part of the context
@@ -285,23 +264,46 @@ const DEFAULT = {
 export function ASCII({ children }) {
   const [charactersTexture, setCharactersTexture] = useState(null)
   const [canvas, setCanvas] = useState()
-  const [state, setState] = useState(DEFAULT)
+
+  const {
+    characters,
+    granularity,
+    charactersLimit,
+    fontSize,
+    fillPixels,
+    setColor,
+    color,
+    fit,
+    greyscale,
+    invert,
+    matrix,
+    setTime,
+    time,
+    background,
+  } = DEFAULT
 
   function set(newSettings) {
-    setState((prevState) => ({ ...prevState, ...newSettings }))
     if (newSettings.charactersTexture) setCharactersTexture(newSettings.charactersTexture)
     if (newSettings.canvas) setCanvas(newSettings.canvas)
     console.log('Settings updated:', newSettings)
   }
 
-  console.log('Current matrix state in ASCII:', state.matrix)
-
   return (
     <AsciiContext.Provider
       value={{
-        ...state,
+        characters: characters.toUpperCase(),
+        granularity,
         charactersTexture,
-        canvas,
+        charactersLimit,
+        fontSize,
+        fillPixels,
+        color: setColor ? color : undefined,
+        fit,
+        greyscale,
+        invert,
+        matrix,
+        time: setTime ? time : undefined,
+        background,
         set,
       }}
     >
