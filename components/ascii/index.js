@@ -24,6 +24,8 @@ const ui = tunnel()
 function Scene() {
   const ref = useRef()
 
+  const { fit } = useContext(AsciiContext)  // Ensure 'fit' is pulled from the context
+
   const [asset, setAsset] = useState('/global.glb')
 
   const gltfLoader = useMemo(() => {
@@ -140,8 +142,6 @@ function Scene() {
     1 // Optional scaling factor
   )
 
-  const { fit } = useContext(AsciiContext)
-
   useEffect(() => {
     if (texture) {
       camera.position.set(0, 0, 5)
@@ -206,7 +206,7 @@ function Postprocessing() {
         charactersLimit={charactersLimit}
         fillPixels={fillPixels}
         color={color}
-        fit={fit}
+        fit={fit}  // Ensure 'fit' is used here as well
         greyscale={greyscale}
         invert={invert}
         matrix={matrix}
@@ -265,7 +265,7 @@ const DEFAULT = {
   matrix: false,
   setTime: false,
   time: 0,
-  fit: true,
+  fit: true,  // 'fit' should be included in the default settings
 }
 
 export function ASCII({ children }) {
@@ -305,7 +305,7 @@ export function ASCII({ children }) {
           fontSize,
           fillPixels,
           color: setColor ? color : undefined,
-          fit,
+          fit,  // Pass 'fit' through the context
           greyscale,
           invert,
           matrix,
