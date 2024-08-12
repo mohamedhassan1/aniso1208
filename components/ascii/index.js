@@ -169,43 +169,28 @@ function Scene() {
 
 function Postprocessing() {
   const { gl, viewport } = useThree()
-  const { set } = useContext(AsciiContext)
+  const { set, matrix } = useContext(AsciiContext)
 
   useEffect(() => {
     set({ canvas: gl.domElement })
-  }, [gl])
+  }, [gl, set])
 
-  const {
-    charactersTexture,
-    granularity,
-    charactersLimit,
-    fillPixels,
-    color,
-    greyscale,
-    invert,
-    matrix,
-    time,
-    background,
-    fit,
-  } = useContext(AsciiContext)
-
-  console.log('Postprocessing: fit value is', fit)
   console.log('Postprocessing: matrix effect is', matrix ? 'ON' : 'OFF')
 
   return (
     <EffectComposer>
       <ASCIIEffect
-        charactersTexture={charactersTexture}
-        granularity={granularity * viewport.dpr}
-        charactersLimit={charactersLimit}
-        fillPixels={fillPixels}
-        color={color}
-        fit={fit}
-        greyscale={greyscale}
-        invert={invert}
+        charactersTexture={viewport.charactersTexture}
+        granularity={viewport.granularity * viewport.dpr}
+        charactersLimit={viewport.charactersLimit}
+        fillPixels={viewport.fillPixels}
+        color={viewport.color}
+        fit={viewport.fit}
+        greyscale={viewport.greyscale}
+        invert={viewport.invert}
         matrix={matrix}
-        time={time}
-        background={background}
+        time={viewport.time}
+        background={viewport.background}
       />
     </EffectComposer>
   )
@@ -213,18 +198,14 @@ function Postprocessing() {
 
 function Inner() {
   const ContextBridge = useContextBridge(AsciiContext)
-  const { set } = useContext(AsciiContext)
+  const { set, matrix } = useContext(AsciiContext)
 
   // Toggle matrix effect on Shift+R
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.shiftKey && event.key === 'R') {
-        console.log('Shift+R pressed, toggling matrix effect...')
-        set((prevState) => {
-          const newMatrixState = !prevState.matrix
-          console.log('Matrix effect is now', newMatrixState ? 'ON' : 'OFF')
-          return { ...prevState, matrix: newMatrixState }
-        })
+        console.log('Shift+R pressed, toggling matrix effect...', !matrix)
+        set({ matrix: !matrix })
       }
     }
 
@@ -232,7 +213,7 @@ function Inner() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [set])
+  }, [matrix, set])
 
   return (
     <>
