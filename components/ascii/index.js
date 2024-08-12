@@ -28,7 +28,7 @@ const ui = tunnel()
 function Scene() {
   const ref = useRef()
 
-  const [asset, setAsset] = useState('/bust.glb')
+  const [asset, setAsset] = useState('/global.glb')
 
   const gltfLoader = useMemo(() => {
     const loader = new GLTFLoader()
