@@ -190,6 +190,7 @@ function Postprocessing() {
   } = useContext(AsciiContext)
 
   console.log('Postprocessing: fit value is', fit)
+  console.log('Postprocessing: matrix effect is', matrix ? 'ON' : 'OFF')
 
   return (
     <EffectComposer>
@@ -212,6 +213,24 @@ function Postprocessing() {
 
 function Inner() {
   const ContextBridge = useContextBridge(AsciiContext)
+  const { set } = useContext(AsciiContext)
+
+  // Toggle matrix effect on Shift+R
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.shiftKey && event.key === 'R') {
+        set((prevState) => {
+          console.log('Toggling matrix effect:', !prevState.matrix)
+          return { ...prevState, matrix: !prevState.matrix }
+        })
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [set])
 
   return (
     <>
@@ -255,7 +274,7 @@ const DEFAULT = {
   background: '#cd9bff',
   greyscale: false,
   invert: false,
-  matrix: false,
+  matrix: false, // Initially off
   setTime: false,
   time: 0,
   fit: true,  // Ensure fit is part of the context
@@ -264,25 +283,10 @@ const DEFAULT = {
 export function ASCII({ children }) {
   const [charactersTexture, setCharactersTexture] = useState(null)
   const [canvas, setCanvas] = useState()
-
-  const {
-    characters,
-    granularity,
-    charactersLimit,
-    fontSize,
-    fillPixels,
-    setColor,
-    color,
-    fit,
-    greyscale,
-    invert,
-    matrix,
-    setTime,
-    time,
-    background,
-  } = DEFAULT
+  const [state, setState] = useState(DEFAULT)
 
   function set(newSettings) {
+    setState((prevState) => ({ ...prevState, ...newSettings }))
     if (newSettings.charactersTexture) setCharactersTexture(newSettings.charactersTexture)
     if (newSettings.canvas) setCanvas(newSettings.canvas)
     console.log('Settings updated:', newSettings)
@@ -291,19 +295,9 @@ export function ASCII({ children }) {
   return (
     <AsciiContext.Provider
       value={{
-        characters: characters.toUpperCase(),
-        granularity,
+        ...state,
         charactersTexture,
-        charactersLimit,
-        fontSize,
-        fillPixels,
-        color: setColor ? color : undefined,
-        fit,
-        greyscale,
-        invert,
-        matrix,
-        time: setTime ? time : undefined,
-        background,
+        canvas,
         set,
       }}
     >
