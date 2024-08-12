@@ -288,6 +288,7 @@ export function ASCII({ children }) {
     console.log('Settings updated:', newSettings)
   }
 
+  
   return (
     <AsciiContext.Provider
       value={{
