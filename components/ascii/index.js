@@ -87,7 +87,8 @@ function Scene() {
   useEffect(() => {
     let src = asset
 
-    if (src.startsWith('data:video') || src.includes('.mp4') || src.includes('.webm') || src.includes('.mov')) {
+    if (
+      src.startsWith('data:video') || src.includes('.mp4') || src.includes('.webm') || src.includes('.mov')) {
       const video = document.createElement('video')
 
       function onLoad() {
@@ -144,7 +145,11 @@ function Scene() {
       <group ref={ref}>
         {gltf && (
           <>
-            <OrbitControls makeDefault />
+            <OrbitControls 
+              makeDefault 
+              enableZoom={false} 
+              enablePan={false} 
+            />
             <group scale={200}>
               <primitive object={gltf} />
             </group>
