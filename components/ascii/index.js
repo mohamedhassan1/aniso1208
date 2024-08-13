@@ -140,6 +140,14 @@ function Scene() {
     camera.updateProjectionMatrix()
   }, [camera, texture])
 
+  // Rotate the object itself
+  useFrame((state, delta) => {
+    if (gltf) {
+      gltf.rotation.y += delta * 0.5 // Rotate around Y axis
+      gltf.rotation.x += delta * 0.2 // Rotate around X axis
+    }
+  })
+
   return (
     <>
       <group ref={ref}>
