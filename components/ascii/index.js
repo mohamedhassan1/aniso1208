@@ -27,8 +27,8 @@ function Scene() {
   const [asset, setAsset] = useState('/global-big.glb')
   const { viewport, camera } = useThree()
 
-  // Calculate the offset for visual positioning
-  const offsetY = -0.3333 * viewport.height
+  // Resetting the offset to 0 to keep the object centered
+  const offsetY = 0
 
   const gltfLoader = useMemo(() => {
     const loader = new GLTFLoader()
@@ -151,7 +151,7 @@ function Scene() {
               enableZoom={false} 
               enablePan={false} 
             />
-            {/* Inner group that is visually offset */}
+            {/* Inner group that remains centered */}
             <group position={[0, offsetY, 0]} scale={200}>
               <primitive object={gltf} />
             </group>
