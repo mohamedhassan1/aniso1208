@@ -27,7 +27,7 @@ function Scene() {
   const [asset, setAsset] = useState('/global-big.glb')
   const { viewport, camera } = useThree()
 
-  // Adjust the position by 33.33% of the viewport height
+  // Calculate the offset for visual positioning
   const offsetY = -0.3333 * viewport.height
 
   const gltfLoader = useMemo(() => {
@@ -144,18 +144,16 @@ function Scene() {
     <>
       <group ref={ref}>
         {gltf && (
+          // Outer group that stays centered in the scene
           <group>
             <OrbitControls 
               makeDefault 
               enableZoom={false} 
               enablePan={false} 
             />
-            {/* Outer group for rotation and centering */}
-            <group>
-              {/* Inner group for visual offset */}
-              <group position={[0, offsetY, 0]} scale={200}>
-                <primitive object={gltf} />
-              </group>
+            {/* Inner group that is visually offset */}
+            <group position={[0, offsetY, 0]} scale={200}>
+              <primitive object={gltf} />
             </group>
           </group>
         )}
