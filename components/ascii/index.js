@@ -30,8 +30,6 @@ function Scene() {
   // Adjust the position by 33.33% of the viewport height
   const offsetY = -0.3333 * viewport.height
 
-  console.log('Scene: fit value is', fit)
-
   const gltfLoader = useMemo(() => {
     const loader = new GLTFLoader()
     const dracoLoader = new DRACOLoader()
@@ -146,14 +144,18 @@ function Scene() {
     <>
       <group ref={ref}>
         {gltf && (
-          <group position={[0, 0, 0]}>
+          <group>
             <OrbitControls 
               makeDefault 
               enableZoom={false} 
               enablePan={false} 
             />
-            <group scale={200} position={[0, offsetY, 0]}>
-              <primitive object={gltf} />
+            {/* Outer group for rotation and centering */}
+            <group>
+              {/* Inner group for visual offset */}
+              <group position={[0, offsetY, 0]} scale={200}>
+                <primitive object={gltf} />
+              </group>
             </group>
           </group>
         )}
