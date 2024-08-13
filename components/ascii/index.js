@@ -35,7 +35,7 @@ function Scene() {
       'https://cdn.jsdelivr.net/npm/three@0.140.0/examples/js/libs/draco/'
     )
     loader.setDRACOLoader(dracoLoader)
-    return loader;
+    return loader
   }, [])
 
   const [mixer, setMixer] = useState()
@@ -130,13 +130,12 @@ function Scene() {
   )
 
   useEffect(() => {
-    const whiteSpaceHeight = 2.5; // Adjust this value based on your white space's height
     if (texture) {
-      camera.position.set(0, whiteSpaceHeight + 5, 5) // Move the camera up to leave the white space at the top
+      camera.position.set(0, 0, 5)
       camera.rotation.set(0, 0, 0)
       camera.zoom = 1
     } else {
-      camera.position.set(500, whiteSpaceHeight + 250, 500)
+      camera.position.set(500, 250, 500)
     }
     camera.updateProjectionMatrix()
   }, [camera, texture])
@@ -151,7 +150,7 @@ function Scene() {
               enableZoom={false} 
               enablePan={false} 
             />
-            <group scale={200}>
+            <group scale={200} position={[0, -viewport.height * 0.33333, 0]}>
               <primitive object={gltf} />
             </group>
           </>
