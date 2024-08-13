@@ -146,7 +146,7 @@ function Scene() {
     <>
       <group ref={ref}>
         {gltf && (
-          <>
+          <group position={[0, 0, 0]}>
             <OrbitControls 
               makeDefault 
               enableZoom={false} 
@@ -155,7 +155,7 @@ function Scene() {
             <group scale={200} position={[0, offsetY, 0]}>
               <primitive object={gltf} />
             </group>
-          </>
+          </group>
         )}
 
         {texture && (
