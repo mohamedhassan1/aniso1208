@@ -144,19 +144,15 @@ function Scene() {
     <>
       <group ref={ref}>
         {gltf && (
-          <group>
+          <group position={[0, offsetY, 0]} scale={200}>
+            {/* Apply OrbitControls only to this group */}
             <OrbitControls 
               makeDefault 
               enableZoom={false} 
-              enablePan={false} 
+              enablePan={false}
+              target={[0, 0, 0]} // Center the control target
             />
-            {/* Outer group for rotation and centering */}
-            <group>
-              {/* Inner group for visual offset */}
-              <group position={[0, offsetY, 0]} scale={200}>
-                <primitive object={gltf} />
-              </group>
-            </group>
+            <primitive object={gltf} />
           </group>
         )}
 
@@ -170,6 +166,7 @@ function Scene() {
     </>
   )
 }
+
 
 function Postprocessing() {
   const { gl, viewport } = useThree()
