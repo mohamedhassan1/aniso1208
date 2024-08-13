@@ -10,9 +10,7 @@ import {
   Group,
   MeshBasicMaterial,
   MeshNormalMaterial,
-  Raycaster,
   TextureLoader,
-  Vector2,
   VideoTexture,
 } from 'three'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
@@ -27,13 +25,10 @@ function Scene() {
   const ref = useRef()
   const { fit } = useContext(AsciiContext)
   const [asset, setAsset] = useState('/global-big.glb')
-  const { viewport, camera, gl } = useThree()
+  const { viewport, camera } = useThree()
 
-  const [mixer, setMixer] = useState()
-  const [isDragging, setIsDragging] = useState(false)
-  const [controlsActive, setControlsActive] = useState(false)
-  const raycaster = useMemo(() => new Raycaster(), [])
-  const mouse = useMemo(() => new Vector2(), [])
+  // Adjust the position by 33.33% of the viewport height
+  const offsetY = -0.3333 * viewport.height
 
   const gltfLoader = useMemo(() => {
     const loader = new GLTFLoader()
@@ -45,39 +40,11 @@ function Scene() {
     return loader
   }, [])
 
-  useFrame((state) => {
-    const { pointer } = state
+  const [mixer, setMixer] = useState()
 
-    // Convert pointer coordinates to normalized device coordinates
-    mouse.x = (pointer.x / gl.domElement.clientWidth) * 2 - 1
-    mouse.y = -(pointer.y / gl.domElement.clientHeight) * 2 + 1
-
-    // Update raycaster and check for intersections
-    raycaster.setFromCamera(mouse, camera)
-    const intersects = raycaster.intersectObject(ref.current, true)
-
-    if (intersects.length > 0) {
-      document.body.style.cursor = 'pointer'
-    } else {
-      document.body.style.cursor = 'auto'
-      setControlsActive(false)
-    }
-
-    // Update mixer for animations
-    if (mixer) mixer.update(state.clock.getDelta())
+  useFrame((_, t) => {
+    mixer?.update(t)
   })
-
-  const handlePointerDown = () => {
-    if (document.body.style.cursor === 'pointer') {
-      setControlsActive(true)
-      setIsDragging(true)
-    }
-  }
-
-  const handlePointerUp = () => {
-    setIsDragging(false)
-    setControlsActive(false)
-  }
 
   const gltf = useMemo(() => {
     if (!asset) return
@@ -175,22 +142,21 @@ function Scene() {
 
   return (
     <>
-      <group
-        ref={ref}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-      >
+      <group ref={ref}>
         {gltf && (
-          <group position={[0, 0, 0]} scale={new Vector3(1, 1, 1)}>
-            {controlsActive && (
-              <OrbitControls
-                makeDefault
-                enableZoom={false}
-                enablePan={false}
-                target={[0, 0, 0]} // Ensure rotation is centered on the object
-              />
-            )}
-            <primitive object={gltf} />
+          <group>
+            <OrbitControls 
+              makeDefault 
+              enableZoom={false} 
+              enablePan={false} 
+            />
+            {/* Outer group for rotation and centering */}
+            <group>
+              {/* Inner group for visual offset */}
+              <group position={[0, offsetY, 0]} scale={200}>
+                <primitive object={gltf} />
+              </group>
+            </group>
           </group>
         )}
 
@@ -226,6 +192,8 @@ function Postprocessing() {
     background,
     fit,
   } = useContext(AsciiContext)
+
+  console.log('Postprocessing: fit value is', fit)
 
   return (
     <EffectComposer>
@@ -324,6 +292,7 @@ export function ASCII({ children }) {
     console.log('Settings updated:', newSettings)
   }
 
+  
   return (
     <AsciiContext.Provider
       value={{
