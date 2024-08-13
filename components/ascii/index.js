@@ -7,12 +7,10 @@ import { FontEditor } from 'components/font-editor'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AnimationMixer,
-  Box3,
   Group,
   MeshBasicMaterial,
   MeshNormalMaterial,
   TextureLoader,
-  Vector3,
   VideoTexture,
 } from 'three'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
@@ -76,12 +74,6 @@ function Scene() {
             mesh.material = new MeshNormalMaterial()
           }
         })
-
-        // Calculate bounding box and center the object
-        const box = new Box3().setFromObject(scene)
-        const center = new Vector3()
-        box.getCenter(center)
-        scene.position.sub(center)  // Offset the object's position by the center of its bounding box
       })
 
       return group
@@ -147,14 +139,6 @@ function Scene() {
     }
     camera.updateProjectionMatrix()
   }, [camera, texture])
-
-  // Rotate the object itself
-  useFrame((state, delta) => {
-    if (gltf) {
-      gltf.rotation.y += delta * 0.5 // Rotate around Y axis
-      gltf.rotation.x += delta * 0.2 // Rotate around X axis
-    }
-  })
 
   return (
     <>
