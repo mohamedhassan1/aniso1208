@@ -150,7 +150,7 @@ function Scene() {
               enableZoom={false} 
               enablePan={false} 
             />
-            <group scale={200}>
+            <group scale={200} position={[0, -viewport.height * 0.33333, 0]}>
               <primitive object={gltf} />
             </group>
           </>
