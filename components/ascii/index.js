@@ -130,13 +130,13 @@ function Scene() {
   )
 
   useEffect(() => {
-    const cameraYPosition = 5 * 1.4; // Move camera up by 40%
+    const whiteSpaceHeight = 2.5; // Adjust this value based on your white space's height
     if (texture) {
-      camera.position.set(0, cameraYPosition, 5)
+      camera.position.set(0, whiteSpaceHeight + 5, 5) // Move the camera up to leave the white space at the top
       camera.rotation.set(0, 0, 0)
       camera.zoom = 1
     } else {
-      camera.position.set(500, cameraYPosition, 500)
+      camera.position.set(500, whiteSpaceHeight + 250, 500)
     }
     camera.updateProjectionMatrix()
   }, [camera, texture])
