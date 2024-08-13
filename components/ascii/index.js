@@ -181,7 +181,7 @@ function Scene() {
         onPointerUp={handlePointerUp}
       >
         {gltf && (
-          <group position={[0, 0, 0]} scale={200}>
+          <group position={[0, 0, 0]} scale={new Vector3(1, 1, 1)}>
             {controlsActive && (
               <OrbitControls
                 makeDefault
