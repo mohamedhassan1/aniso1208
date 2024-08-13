@@ -25,6 +25,10 @@ function Scene() {
   const ref = useRef()
   const { fit } = useContext(AsciiContext)
   const [asset, setAsset] = useState('/global-big.glb')
+  const { viewport, camera } = useThree()
+
+  // Adjust the position by 33.33% of the viewport height
+  const offsetY = -0.3333 * viewport.height
 
   console.log('Scene: fit value is', fit)
 
@@ -112,8 +116,6 @@ function Scene() {
     }
   }, [asset])
 
-  const { viewport, camera } = useThree()
-
   const dimensions = useMemo(() => {
     if (!texture) return
     if (texture.isVideoTexture) {
@@ -150,7 +152,7 @@ function Scene() {
               enableZoom={false} 
               enablePan={false} 
             />
-            <group scale={200}>
+            <group scale={200} position={[0, offsetY, 0]}>
               <primitive object={gltf} />
             </group>
           </>
