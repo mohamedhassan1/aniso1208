@@ -289,25 +289,13 @@ export function ASCII({ children }) {
     background,
   } = DEFAULT
 
-  const [isMatrixEnabled, setIsMatrixEnabled] = useState(matrix)
-
-  // Function to toggle the Matrix effect
-  const toggleMatrixEffect = () => {
-    setIsMatrixEnabled((prev) => !prev)
-    set({ matrix: !isMatrixEnabled }) // Update the context with the new matrix value
+  function set(newSettings) {
+    if (newSettings.charactersTexture) setCharactersTexture(newSettings.charactersTexture)
+    if (newSettings.canvas) setCanvas(newSettings.canvas)
+    console.log('Settings updated:', newSettings)
   }
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.shiftKey && event.key === 'R') {
-        toggleMatrixEffect()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isMatrixEnabled])
-
+  
   return (
     <AsciiContext.Provider
       value={{
@@ -321,7 +309,7 @@ export function ASCII({ children }) {
         fit,
         greyscale,
         invert,
-        matrix: isMatrixEnabled, // Ensure matrix state is linked
+        matrix,
         time: setTime ? time : undefined,
         background,
         set,
