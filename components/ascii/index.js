@@ -271,6 +271,7 @@ const DEFAULT = {
 export function ASCII({ children }) {
   const [charactersTexture, setCharactersTexture] = useState(null)
   const [canvas, setCanvas] = useState()
+  const [matrix, setMatrix] = useState(DEFAULT.matrix)
 
   const {
     characters,
@@ -283,19 +284,33 @@ export function ASCII({ children }) {
     fit,
     greyscale,
     invert,
-    matrix,
+    matrix: contextMatrix,
     setTime,
     time,
     background,
   } = DEFAULT
 
+  useEffect(() => {
+    function handleKeyPress(event) {
+      if (event.shiftKey && event.key === 'R') {
+        setMatrix((prevMatrix) => !prevMatrix)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [])
+
   function set(newSettings) {
     if (newSettings.charactersTexture) setCharactersTexture(newSettings.charactersTexture)
     if (newSettings.canvas) setCanvas(newSettings.canvas)
+    if (newSettings.matrix !== undefined) setMatrix(newSettings.matrix)
     console.log('Settings updated:', newSettings)
   }
 
-  
   return (
     <AsciiContext.Provider
       value={{
