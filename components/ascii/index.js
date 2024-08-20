@@ -152,6 +152,8 @@ function Scene() {
               enablePan={false} 
               maxPolarAngle={Math.PI / 2} // Restrict vertical rotation
               minPolarAngle={Math.PI / 2} // Restrict vertical rotation
+              autoRotate={true} // Enable auto-rotation
+              autoRotateSpeed={1} // Set auto-rotation speed
             />
             {/* Outer group for rotation and centering */}
             <group>
