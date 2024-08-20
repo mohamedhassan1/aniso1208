@@ -145,10 +145,13 @@ function Scene() {
       <group ref={ref}>
         {gltf && (
           <group>
+            {/* Restricting OrbitControls to only rotate horizontally */}
             <OrbitControls 
               makeDefault 
               enableZoom={false} 
               enablePan={false} 
+              maxPolarAngle={Math.PI / 2} // Restrict vertical rotation
+              minPolarAngle={Math.PI / 2} // Restrict vertical rotation
             />
             {/* Outer group for rotation and centering */}
             <group>
