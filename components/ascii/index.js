@@ -1,163 +1,181 @@
-import { OrbitControls, useAspect, useContextBridge } from '@react-three/drei'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { EffectComposer } from '@react-three/postprocessing'
-import cn from 'clsx'
-import { ASCIIEffect } from 'components/ascii-effect/index'
-import { FontEditor } from 'components/font-editor'
-import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { OrbitControls, useAspect, useContextBridge } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { EffectComposer } from '@react-three/postprocessing';
+import cn from 'clsx';
+import { ASCIIEffect } from 'components/ascii-effect/index';
+import { FontEditor } from 'components/font-editor';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AnimationMixer,
   Group,
   MeshBasicMaterial,
   MeshNormalMaterial,
   TextureLoader,
-  VideoTexture,
-} from 'three'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import tunnel from 'tunnel-rat'
-import s from './ascii.module.scss'
-import { AsciiContext } from './context'
+  VideoTexture
+} from 'three';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import tunnel from 'tunnel-rat';
+import s from './ascii.module.scss';
+import { AsciiContext } from './context';
 
-const ui = tunnel()
+const ui = tunnel();
 
 function Scene() {
-  const ref = useRef()
-  const { fit } = useContext(AsciiContext)
-  const [asset, setAsset] = useState('/global-big.glb')
-  const { viewport, camera } = useThree()
+  const ref = useRef();
+  const { fit } = useContext(AsciiContext);
+  const [asset, setAsset] = useState('/global-big.glb');
+  const { viewport, camera } = useThree();
 
   // Adjust the position by 33.33% of the viewport height
-  const offsetY = -0.3333 * viewport.height
+  const offsetY = -0.3333 * viewport.height;
 
   const gltfLoader = useMemo(() => {
-    const loader = new GLTFLoader()
-    const dracoLoader = new DRACOLoader()
+    const loader = new GLTFLoader();
+    const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath(
       'https://cdn.jsdelivr.net/npm/three@0.140.0/examples/js/libs/draco/'
-    )
-    loader.setDRACOLoader(dracoLoader)
-    return loader
-  }, [])
+    );
+    loader.setDRACOLoader(dracoLoader);
+    return loader;
+  }, []);
 
-  const [mixer, setMixer] = useState()
+  const [mixer, setMixer] = useState();
 
   useFrame((_, t) => {
-    mixer?.update(t)
-  })
+    mixer?.update(t);
+  });
 
   const gltf = useMemo(() => {
-    if (!asset) return
-    let src = asset
+    if (!asset) return;
+    let src = asset;
 
     if (src.startsWith('data:application/octet-stream;base64') || src.includes('.glb')) {
-      const group = new Group()
+      const group = new Group();
 
       gltfLoader.load(src, ({ scene, animations }) => {
-        const mixer = new AnimationMixer(scene)
-        setMixer(mixer)
-        const clips = animations
+        const mixer = new AnimationMixer(scene);
+        setMixer(mixer);
+        const clips = animations;
 
         clips.forEach((clip) => {
-          mixer.clipAction(clip).play()
-        })
+          mixer.clipAction(clip).play();
+        });
 
-        group.add(scene)
+        group.add(scene);
         scene.traverse((mesh) => {
           if (
             Object.keys(mesh.userData)
               .map((v) => v.toLowerCase())
               .includes('occlude')
           ) {
-            mesh.material = new MeshBasicMaterial({ color: '#000000' })
+            mesh.material = new MeshBasicMaterial({ color: '#000000' });
           } else {
-            mesh.material = new MeshNormalMaterial()
+            mesh.material = new MeshNormalMaterial();
           }
-        })
-      })
+        });
+      });
 
-      return group
+      return group;
     }
-  }, [asset])
+  }, [asset]);
 
-  const [texture, setTexture] = useState()
-
-  useEffect(() => {
-    if (gltf) setTexture(null)
-  }, [gltf])
+  const [texture, setTexture] = useState();
 
   useEffect(() => {
-    let src = asset
+    if (gltf) setTexture(null);
+  }, [gltf]);
+
+  useEffect(() => {
+    let src = asset;
 
     if (
-      src.startsWith('data:video') || src.includes('.mp4') || src.includes('.webm') || src.includes('.mov')) {
-      const video = document.createElement('video')
+      src.startsWith('data:video') ||
+      src.includes('.mp4') ||
+      src.includes('.webm') ||
+      src.includes('.mov')
+    ) {
+      const video = document.createElement('video');
 
       function onLoad() {
-        setTexture(new VideoTexture(video))
+        setTexture(new VideoTexture(video));
       }
 
-      video.addEventListener('loadedmetadata', onLoad, { once: true })
+      video.addEventListener('loadedmetadata', onLoad, { once: true });
 
-      video.src = src
-      video.crossOrigin = 'anonymous'
-      video.muted = true
-      video.playsInline = true
-      video.loop = true
-      video.autoplay = true
-      video.play()
+      video.src = src;
+      video.crossOrigin = 'anonymous';
+      video.muted = true;
+      video.playsInline = true;
+      video.loop = true;
+      video.autoplay = true;
+      video.play();
     } else if (
-      src.startsWith('data:image') || src.includes('.jpg') || src.includes('.png') || src.includes('.jpeg')) {
+      src.startsWith('data:image') ||
+      src.includes('.jpg') ||
+      src.includes('.png') ||
+      src.includes('.jpeg')
+    ) {
       new TextureLoader().load(src, (texture) => {
-        setTexture(texture)
-      })
+        setTexture(texture);
+      });
+    } else if (src.includes('.html')) {
+      // Handle iframe embedding
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.style.border = 'none';
+      iframe.style.position = 'absolute';
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+
+      const texture = new VideoTexture(iframe); // Create a texture from the iframe
+      setTexture(texture);
     }
-  }, [asset])
+  }, [asset]);
 
   const dimensions = useMemo(() => {
-    if (!texture) return
+    if (!texture) return;
     if (texture.isVideoTexture) {
-      return [texture.image.videoWidth, texture.image.videoHeight]
+      return [texture.image.videoWidth, texture.image.videoHeight];
     } else {
-      return [texture.image.naturalWidth, texture.image.naturalHeight]
+      return [texture.image.naturalWidth, texture.image.naturalHeight];
     }
-  }, [texture])
+  }, [texture]);
 
   const scale = useAspect(
     dimensions?.[0] || viewport.width, // Pixel-width
     dimensions?.[1] || viewport.height, // Pixel-height
     1 // Optional scaling factor
-  )
+  );
 
   useEffect(() => {
     if (texture) {
-      camera.position.set(0, 0, 5)
-      camera.rotation.set(0, 0, 0)
-      camera.zoom = 1
+      camera.position.set(0, 0, 5);
+      camera.rotation.set(0, 0, 0);
+      camera.zoom = 1;
     } else {
-      camera.position.set(500, 250, 500)
+      camera.position.set(500, 250, 500);
     }
-    camera.updateProjectionMatrix()
-  }, [camera, texture])
+    camera.updateProjectionMatrix();
+  }, [camera, texture]);
 
   return (
     <>
       <group ref={ref}>
         {gltf && (
           <group>
-            {/* Restricting OrbitControls to only rotate horizontally */}
-            <OrbitControls 
-              makeDefault 
-              enableZoom={false} 
-              enablePan={false} 
-              maxPolarAngle={Math.PI / 2} // Restrict verticSSal rotation
-              minPolarAngle={Math.PI / 2} // Restrict vertical rotation
-              autoRotate={true} // Enable auto-rotation
-              autoRotateSpeed={5} // Set auto-rotation speed
+            <OrbitControls
+              makeDefault
+              enableZoom={false}
+              enablePan={false}
+              maxPolarAngle={Math.PI / 2}
+              minPolarAngle={Math.PI / 2}
+              autoRotate={true}
+              autoRotateSpeed={5}
             />
-            {/* Outer group for rotation and centering */}
             <group>
-              {/* Inner group for visual offset */}
               <group position={[0, offsetY, 0]} scale={200}>
                 <primitive object={gltf} />
               </group>
@@ -173,16 +191,16 @@ function Scene() {
         )}
       </group>
     </>
-  )
+  );
 }
 
 function Postprocessing() {
-  const { gl, viewport } = useThree()
-  const { set } = useContext(AsciiContext)
+  const { gl, viewport } = useThree();
+  const { set } = useContext(AsciiContext);
 
   useEffect(() => {
-    set({ canvas: gl.domElement })
-  }, [gl])
+    set({ canvas: gl.domElement });
+  }, [gl]);
 
   const {
     charactersTexture,
@@ -196,9 +214,9 @@ function Postprocessing() {
     time,
     background,
     fit,
-  } = useContext(AsciiContext)
+  } = useContext(AsciiContext);
 
-  console.log('Postprocessing: fit value is', fit)
+  console.log('Postprocessing: fit value is', fit);
 
   return (
     <EffectComposer>
@@ -216,11 +234,11 @@ function Postprocessing() {
         background={background}
       />
     </EffectComposer>
-  )
+  );
 }
 
 function Inner() {
-  const ContextBridge = useContextBridge(AsciiContext)
+  const ContextBridge = useContextBridge(AsciiContext);
 
   return (
     <>
@@ -250,7 +268,7 @@ function Inner() {
       <FontEditor />
       <ui.Out />
     </>
-  )
+  );
 }
 
 const DEFAULT = {
@@ -267,13 +285,13 @@ const DEFAULT = {
   matrix: false,
   setTime: false,
   time: 0,
-  fit: true,  // Ensure fit is part of the context
-}
+  fit: true, // Ensure fit is part of the context
+};
 
 export function ASCII({ children }) {
-  const [charactersTexture, setCharactersTexture] = useState(null)
-  const [canvas, setCanvas] = useState()
-  const [matrix, setMatrix] = useState(DEFAULT.matrix)
+  const [charactersTexture, setCharactersTexture] = useState(null);
+  const [canvas, setCanvas] = useState();
+  const [matrix, setMatrix] = useState(DEFAULT.matrix);
 
   const {
     characters,
@@ -290,27 +308,27 @@ export function ASCII({ children }) {
     setTime,
     time,
     background,
-  } = DEFAULT
+  } = DEFAULT;
 
   useEffect(() => {
     function handleKeyPress(event) {
       if (event.shiftKey && event.key === 'R') {
-        setMatrix((prevMatrix) => !prevMatrix)
+        setMatrix((prevMatrix) => !prevMatrix);
       }
     }
 
-    window.addEventListener('keydown', handleKeyPress)
+    window.addEventListener('keydown', handleKeyPress);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyPress)
+      window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [])
+  }, []);
 
   function set(newSettings) {
-    if (newSettings.charactersTexture) setCharactersTexture(newSettings.charactersTexture)
-    if (newSettings.canvas) setCanvas(newSettings.canvas)
-    if (newSettings.matrix !== undefined) setMatrix(newSettings.matrix)
-    console.log('Settings updated:', newSettings)
+    if (newSettings.charactersTexture) setCharactersTexture(newSettings.charactersTexture);
+    if (newSettings.canvas) setCanvas(newSettings.canvas);
+    if (newSettings.matrix !== undefined) setMatrix(newSettings.matrix);
+    console.log('Settings updated:', newSettings);
   }
 
   return (
@@ -334,5 +352,5 @@ export function ASCII({ children }) {
     >
       <Inner />
     </AsciiContext.Provider>
-  )
+  );
 }
