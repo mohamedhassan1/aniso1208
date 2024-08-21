@@ -11,7 +11,7 @@ import {
   MeshBasicMaterial,
   MeshNormalMaterial,
   TextureLoader,
-  VideoTexture
+  VideoTexture,
 } from 'three';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -130,8 +130,9 @@ function Scene() {
       iframe.style.top = '0';
       iframe.style.left = '0';
 
-      const texture = new VideoTexture(iframe); // Create a texture from the iframe
-      setTexture(texture);
+      // Since Three.js doesn't support iframes as textures, this is where the handling stops. 
+      // The iframe will be embedded into the DOM, but it won't be rendered as a 3D texture in Three.js.
+      document.body.appendChild(iframe); // Embed the iframe directly into the DOM
     }
   }, [asset]);
 
