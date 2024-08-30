@@ -124,10 +124,17 @@ const nextConfig = {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
+          
+              {
+                "key": "X-Frame-Options",
+                "value": "ALLOW-FROM https://reline.ch"
+              },
+              {
+                "key": "X-Frame-Options",
+                "value": "ALLOW-FROM https://reline-studio.webflow.io"
+              },
+          
+        
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
